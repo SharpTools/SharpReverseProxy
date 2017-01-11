@@ -15,6 +15,7 @@ Add SharpReverseProxy via Nuget
 
 Open your *Startup.cs* and configure your reverse proxy:
 
+```csharp
     public void Configure(IApplicationBuilder app, 
 						  IHostingEnvironment env, 
 						  ILoggerFactory loggerFactory) {
@@ -42,7 +43,7 @@ Open your *Startup.cs* and configure your reverse proxy:
 
             app.UseMvc();
 	}
-
+```
 
 ###Explanation:
 
@@ -53,6 +54,7 @@ Create the options object that will hold all our proxy rules:
 Add a proxy rule. You can create as many as you want and the proxy will use the first matched rule to divert the request.
 
 For every rule, define the matcher and the modifier:
+
 ```Func<Uri, bool> Matcher```: responsible for selecting which request will be handled by this rule. Simply analyse the Uri and return true/false.
 
 ```Action<UriBuilder> Modifier```: responsible for modifying the final Uri.
