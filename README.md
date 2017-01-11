@@ -49,14 +49,17 @@ Open your *Startup.cs* and configure your reverse proxy:
 
 Create the options object that will hold all our proxy rules:
 
+```csharp
     var proxyOptions = new ProxyOptions();
-
+```
 Add a proxy rule. You can create as many as you want and the proxy will use the first matched rule to divert the request.
 
 For every rule, define the matcher and the modifier:
 
+#### Matcher
 ```Func<Uri, bool> Matcher```: responsible for selecting which request will be handled by this rule. Simply analyse the Uri and return true/false.
 
+#### Modifier
 ```Action<UriBuilder> Modifier```: responsible for modifying the final Uri.
 
 In the code below, we are adding the following rule:
@@ -66,7 +69,7 @@ In the code below, we are adding the following rule:
 
 2 - Proxy the request to: http<nolink>://[service name].noplace.com/api/
 
-
+```csharp
     proxyOptions.AddProxyRule(new ProxyRule {
          Matcher = uri => uri.AbsoluteUri.Contains("/api/"),
          Modifier = uri => {
@@ -75,26 +78,29 @@ In the code below, we are adding the following rule:
              uri.Path = uri.Path.Replace(match.Value, "/api/");
          }
 	});
-
+```
 You have total control about how to proxy a request, have fun :)
 
+#### Reporter
 After every request, a ProxyResult is returned so you can log/take actions about what happened.
 
 ```Action<ProxyResult> Reporter```: returns request information.
 
 In the code below, we show the request URL, if it was proxied and the time it took. When proxied, we also log the new URL and the status code.
-
+```csharp
     proxyOptions.Reporter = r => {
 		logger.LogDebug($"Proxy: {r.Proxied} Url: {r.OriginalUri} Time: {r.Elipsed}");
         if (r.Proxied) {
 	        logger.LogDebug($"-> New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.StatusCode}");
 		}
     };
-
+```
 Finally, add the proxy to our application pipeline:
 
+#### Enable your proxy!
+```csharp
     app.UseProxy(proxyOptions);
-
+```
 And that's it!
 
 Heavily inspired on https://github.com/aspnet/Proxy
