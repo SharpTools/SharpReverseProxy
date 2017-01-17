@@ -18,6 +18,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleApi2", "src\SampleApi
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SharpReverseProxy", "src\SharpReverseProxy\SharpReverseProxy.xproj", "{9058D441-59F9-43BA-A84A-72E51F78CFE7}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleApiAuthentication", "src\SampleApiAuthentication\SampleApiAuthentication.xproj", "{59C31257-CE3D-4BF2-8F57-F01CD6830B57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{9058D441-59F9-43BA-A84A-72E51F78CFE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9058D441-59F9-43BA-A84A-72E51F78CFE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9058D441-59F9-43BA-A84A-72E51F78CFE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59C31257-CE3D-4BF2-8F57-F01CD6830B57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59C31257-CE3D-4BF2-8F57-F01CD6830B57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59C31257-CE3D-4BF2-8F57-F01CD6830B57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59C31257-CE3D-4BF2-8F57-F01CD6830B57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,5 +55,6 @@ Global
 		{5FA15D8F-B1B9-425D-9535-47F54530BEFC} = {45306927-8BF0-4B67-A17E-BC2B9E13185E}
 		{7D85A9EC-3C09-42FB-91BC-04E95E890F37} = {45306927-8BF0-4B67-A17E-BC2B9E13185E}
 		{9058D441-59F9-43BA-A84A-72E51F78CFE7} = {45306927-8BF0-4B67-A17E-BC2B9E13185E}
+		{59C31257-CE3D-4BF2-8F57-F01CD6830B57} = {45306927-8BF0-4B67-A17E-BC2B9E13185E}
 	EndGlobalSection
 EndGlobal
