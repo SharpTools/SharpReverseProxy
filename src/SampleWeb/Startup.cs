@@ -32,36 +32,35 @@ namespace SampleWeb {
 
             ConfigureAuthentication(app);
 
-            var proxyOptions = new ProxyOptions();
-            proxyOptions.AddProxyRule(new ProxyRule {
-                Matcher = uri => uri.AbsoluteUri.Contains("/api1"),
-                Modifier = uri => {
-                    uri.Port = 5001;
-                    uri.Path = "/api/values";
+            app.UseProxy(new List<ProxyRule> {
+                new ProxyRule {
+                    Matcher = uri => uri.AbsoluteUri.Contains("/api1"),
+                    Modifier = uri => {
+                        uri.Port = 5001;
+                        uri.Path = "/api/values";
+                    }
+                },
+                new ProxyRule {
+                    Matcher = uri => uri.AbsoluteUri.Contains("/api2"),
+                    Modifier = uri => {
+                        uri.Port = 5002;
+                        uri.Path = "/api/values";
+                    },
+                    RequiresAuthentication = true
+                },
+                new ProxyRule {
+                    Matcher = uri => uri.AbsoluteUri.Contains("/authenticate"),
+                    Modifier = uri => {
+                        uri.Port = 5000;
+                    },
                 }
-            });
-            proxyOptions.AddProxyRule(new ProxyRule {
-                Matcher = uri => uri.AbsoluteUri.Contains("/api2"),
-                Modifier = uri => {
-                    uri.Port = 5002;
-                    uri.Path = "/api/values";
-                },
-                RequiresAuthentication = true
-            });
-            proxyOptions.AddProxyRule(new ProxyRule {
-                Matcher = uri => uri.AbsoluteUri.Contains("/authenticate"),
-                Modifier = uri => {
-                    uri.Port = 5000;
-                },
-            });
-            proxyOptions.Reporter = r => {
+            },
+            r => {
                 logger.LogDebug($"Proxy: {r.Proxied} Url: {r.OriginalUri} Time: {r.Elipsed}");
                 if (r.Proxied) {
-                    logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.StatusCode}" );
+                    logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.StatusCode}");
                 }
-            };
-
-            app.UseProxy(proxyOptions);
+            });
 
             app.Run(async (context) => {
                 await context.Response.WriteAsync("Hello World!");

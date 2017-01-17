@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 
 namespace SharpReverseProxy {
@@ -12,6 +14,10 @@ namespace SharpReverseProxy {
         /// <returns></returns>
         public static IApplicationBuilder UseProxy(this IApplicationBuilder app, ProxyOptions proxyOptions) {
             return app.UseMiddleware<ProxyMiddleware>(Options.Create(proxyOptions));
+        }
+
+        public static IApplicationBuilder UseProxy(this IApplicationBuilder app, IEnumerable<ProxyRule> rules, Action<ProxyResult> reporter = null) {
+            return app.UseMiddleware<ProxyMiddleware>(Options.Create(new ProxyOptions(rules, reporter)));
         }
     }
 }
