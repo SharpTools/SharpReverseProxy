@@ -16,7 +16,7 @@ namespace SharpReverseProxy {
             return app.UseMiddleware<ProxyMiddleware>(Options.Create(proxyOptions));
         }
 
-        public static IApplicationBuilder UseProxy(this IApplicationBuilder app, IEnumerable<ProxyRule> rules, Action<ProxyResult> reporter = null) {
+        public static IApplicationBuilder UseProxy(this IApplicationBuilder app, List<ProxyRule> rules, Action<ProxyResult> reporter = null) {
             return app.UseMiddleware<ProxyMiddleware>(Options.Create(new ProxyOptions(rules, reporter)));
         }
     }

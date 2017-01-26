@@ -35,30 +35,39 @@ namespace SampleWeb {
             app.UseProxy(new List<ProxyRule> {
                 new ProxyRule {
                     Matcher = uri => uri.AbsoluteUri.Contains("/api1"),
-                    Modifier = uri => {
-                        uri.Port = 5001;
-                        uri.Path = "/api/values";
+                    Modifier = (msg ,user) => {
+                        var uri = new UriBuilder(msg.RequestUri) {
+                            Port = 5001,
+                            Path = "/api/values"
+                        };
+                        msg.RequestUri = uri.Uri;
                     }
                 },
                 new ProxyRule {
                     Matcher = uri => uri.AbsoluteUri.Contains("/api2"),
-                    Modifier = uri => {
-                        uri.Port = 5002;
-                        uri.Path = "/api/values";
+                    Modifier = (msg ,user) => {
+                        var uri = new UriBuilder(msg.RequestUri) {
+                            Port = 5002,
+                            Path = "/api/values" 
+                        };
+                        msg.RequestUri = uri.Uri;
                     },
                     RequiresAuthentication = true
                 },
                 new ProxyRule {
                     Matcher = uri => uri.AbsoluteUri.Contains("/authenticate"),
-                    Modifier = uri => {
-                        uri.Port = 5000;
+                    Modifier = (msg ,user) => {
+                        var uri = new UriBuilder(msg.RequestUri) {
+                            Port = 5000
+                        };
+                        msg.RequestUri = uri.Uri;
                     },
                 }
             },
             r => {
-                logger.LogDebug($"Proxy: {r.Proxied} Url: {r.OriginalUri} Time: {r.Elipsed}");
-                if (r.Proxied) {
-                    logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.StatusCode}");
+                logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
+                if (r.ProxyStatus == ProxyStatus.Proxied) {
+                    logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
                 }
             });
 

@@ -11,8 +11,8 @@ namespace SharpReverseProxy {
 
         public ProxyOptions() {}
 
-        public ProxyOptions(IEnumerable<ProxyRule> rules, Action<ProxyResult> reporter = null) {
-            ProxyRules = rules.ToList();
+        public ProxyOptions(List<ProxyRule> rules, Action<ProxyResult> reporter = null) {
+            ProxyRules = rules;
             if (reporter != null) {
                 Reporter = reporter;
             }
