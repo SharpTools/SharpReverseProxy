@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.2.0-alpha",
+  "version": "1.2.1",
   "authors": [ "Andre Carlucci" ],
   "description": "Powerful Reverse Proxy written as OWIN Middleware. Perfect for asp.net, web.api, microservices, etc.",
 
@@ -9,7 +9,10 @@
       "url": "https://github.com/SharpTools/SharpReverseProxy"
     },
     "owners": [ "Andre Carlucci" ],
-    "summary": "Powerful Reverse Proxy written as OWIN Middleware. Perfect for asp.net, web.api, microservices, etc."
+    "summary": "Powerful Reverse Proxy written as OWIN Middleware. Perfect for asp.net, web.api, microservices, etc.",
+    "tags": [
+      "aspnetcore", "microservices", "proxy", "apigateway"
+    ]
   },
 
   "dependencies": {
