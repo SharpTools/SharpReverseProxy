@@ -54,9 +54,9 @@ For every rule, define the matcher and the modifier:
 In the code below, we are adding the following rule:
 
 
-1 - Find urls with "/api1".  Ex: http<nolink>://www.noplace.com/api/[service name]service/
+1 - Find urls with "/api1".  Ex: http<nolink>://www.noplace.com/api/[servicename]service/
 
-2 - Proxy the request to: http<nolink>://[service name].noplace.com/api/
+2 - Proxy the request to: http<nolink>://[servicename].noplace.com/api/
 
 ```csharp
    new ProxyRule {
