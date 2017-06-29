@@ -49,11 +49,11 @@ For every rule, define the matcher and the modifier:
 
 #### Matcher
 
-```Func<Uri, bool> Matcher```: responsible for selecting which request will be handled by this rule. Simply analyse the Uri and return true/false.
+`Func<Uri, bool> Matcher`: responsible for selecting which request will be handled by this rule. Simply analyse the Uri and return true/false.
 
 #### Modifier
 
-```Action<HttpRequestMessage, ClaimsPrincipal> Modifier```: responsible for modifying the proxied request.
+`Action<HttpRequestMessage, ClaimsPrincipal> Modifier`: responsible for modifying the proxied request.
 
 In the code below, we are adding the following rule:
 
@@ -82,7 +82,7 @@ You have total control over proxying requests: have fun! 😃
 
 After every request, a `ProxyResult` is returned so you can log/take actions about what happened.
 
-```Action<ProxyResult> Reporter```: returns request information.
+`Action<ProxyResult> Reporter`: returns request information.
 
 In the code below, we show the request URL, if it was proxied, and the time it took. When proxied, we also log the new URL and the status code.
 
