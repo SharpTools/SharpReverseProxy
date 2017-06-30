@@ -62,26 +62,25 @@ namespace SharpReverseProxy {
                     {
                         context.Response.Headers[header.Key] = header.Value.ToArray();
                     }
-                    if (responseMessage.Content == null)
+                    if (responseMessage.Content != null)
                     {
-                        return;
-                    }
-                    foreach (var header in responseMessage.Content.Headers)
-                    {
-                        context.Response.Headers[header.Key] = header.Value.ToArray();
+                        foreach (var header in responseMessage.Content.Headers)
+                        {
+                            context.Response.Headers[header.Key] = header.Value.ToArray();
+                        }
                     }
                     // SendAsync removes chunking from the response. 
                     // This removes the header so it doesn't expect a chunked response.
-                    context.Response.Headers.Remove("transfer-encoding");
+                    context.Response.Headers?.Remove("transfer-encoding");
                 }
 
-                if (proxyRule.ResponseModifier == null)
-                {
-                    await responseMessage.Content.CopyToAsync(context.Response.Body);
-                }
-                else
+                if (proxyRule.ResponseModifier != null)
                 {
                     await proxyRule.ResponseModifier.Invoke(responseMessage, context);
+                }
+                else if (responseMessage.Content != null)
+                {
+                    await responseMessage.Content.CopyToAsync(context.Response.Body);
                 }
             }
         }
