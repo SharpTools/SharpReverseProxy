@@ -26,7 +26,7 @@ namespace SharpReverseProxy.Tests.HttpContextFakes {
 
         public override int StatusCode { get; set; }
         public override IHeaderDictionary Headers { get; }
-        public override Stream Body { get; set; }
+        public override Stream Body { get; set; } = new MemoryStream();
         public override long? ContentLength { get; set; }
         public override string ContentType { get; set; }
         public override IResponseCookies Cookies { get; }
