@@ -33,7 +33,7 @@ namespace SharpReverseProxy {
 
         private ProxyResult Finish(ProxyStatus proxyStatus) {
             _result.ProxyStatus = proxyStatus;
-            _result.Elipsed = DateTime.Now - _start;
+            _result.Elapsed = DateTime.Now - _start;
             return _result;
         }
     }
