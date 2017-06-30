@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Powerful Reverse Proxy written as OWIN Middleware. Perfect for asp.net, web.api, microservices, etc.</Description>
-    <VersionPrefix>1.2.1</VersionPrefix>
+    <Version>1.3.0</Version>
     <Authors>Andre Carlucci</Authors>
     <TargetFramework>netstandard1.6</TargetFramework>
     <AssemblyName>SharpReverseProxy</AssemblyName>
