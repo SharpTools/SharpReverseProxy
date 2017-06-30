@@ -25,10 +25,13 @@ public void Configure(IApplicationBuilder app,
     app.UseProxy(new List<ProxyRule> {
 	new ProxyRule {
 	     Matcher = uri => uri.AbsoluteUri.Contains("/api/"),
-	     Modifier = uri => {
-		 var match = Regex.Match(uri.Path, "/api/(.+)service");
-		 uri.Host = match.Groups[1].Value + "." + uri.Host;
-		 uri.Path = uri.Path.Replace(match.Value, "/api/");
+	     Modifier = (req, user) => {
+		var match = Regex.Match(req.RequestUri.AbsolutePath, "/api/(.+)service");
+		req.RequestUri = new Uri(string.Format("http://{0}.{1}/{2}",
+		    match.Groups[1].Value,
+		    req.RequestUri.Host,
+		    req.RequestUri.AbsolutePath.Replace(match.Value, "/api/")
+		));
 	     },
 	    RequiresAuthentication = true
 	}
