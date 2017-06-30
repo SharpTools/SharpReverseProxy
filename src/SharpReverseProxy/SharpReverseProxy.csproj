@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Powerful Reverse Proxy written as OWIN Middleware. Perfect for asp.net, web.api, microservices, etc.</Description>
+    <VersionPrefix>1.2.1</VersionPrefix>
+    <Authors>Andre Carlucci</Authors>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <AssemblyName>SharpReverseProxy</AssemblyName>
+    <PackageId>SharpReverseProxy</PackageId>
+    <PackageTags>aspnetcore;microservices;proxy;apigateway</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/SharpTools/SharpReverseProxy</RepositoryUrl>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="1.1.2" />
+  </ItemGroup>
+
+</Project>
