@@ -19,28 +19,28 @@ Open your *Startup.cs* and configure your reverse proxy:
 
 ```csharp
 public void Configure(IApplicationBuilder app, 
-		  IHostingEnvironment env, 
-		  ILoggerFactory loggerFactory) {
+    IHostingEnvironment env, 
+    ILoggerFactory loggerFactory) {
 
     app.UseProxy(new List<ProxyRule> {
-	new ProxyRule {
-	     Matcher = uri => uri.AbsoluteUri.Contains("/api/"),
-	     Modifier = (req, user) => {
-		var match = Regex.Match(req.RequestUri.AbsolutePath, "/api/(.+)service");
-		req.RequestUri = new Uri(string.Format("http://{0}.{1}/{2}",
-		    match.Groups[1].Value,
-		    req.RequestUri.Host,
-		    req.RequestUri.AbsolutePath.Replace(match.Value, "/api/")
-		));
-	     },
-	    RequiresAuthentication = true
-	}
+        new ProxyRule {
+            Matcher = uri => uri.AbsoluteUri.Contains("/api/"),
+            Modifier = (req, user) => {
+                var match = Regex.Match(req.RequestUri.AbsolutePath, "/api/(.+)service");
+                req.RequestUri = new Uri(string.Format("http://{0}.{1}/{2}",
+                    match.Groups[1].Value,
+                    req.RequestUri.Host,
+                    req.RequestUri.AbsolutePath.Replace(match.Value, "/api/")
+                ));
+            },
+            RequiresAuthentication = true
+        }
     },
     r => {
-	_logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
-	if (r.ProxyStatus == ProxyStatus.Proxied) {
-	    _logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
-	}
+        _logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
+        if (r.ProxyStatus == ProxyStatus.Proxied) {
+            _logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
+        }
     });
 }
 ```
@@ -64,15 +64,15 @@ In the code below, we are adding the following rule:
 2. Proxy the request to: `http://[servicename].noplace.com/api/`
 
 ```csharp
-   new ProxyRule {
-      Matcher = uri => uri.AbsoluteUri.Contains("/api/"),
-      Modifier = uri => {
-         var match = Regex.Match(uri.Path, "/api/(.+)service");
-         uri.Host = match.Groups[1].Value + "." + uri.Host;
-         uri.Path = uri.Path.Replace(match.Value, "/api/");
-      },
-      RequiresAuthentication = true
-   }
+new ProxyRule {
+    Matcher = uri => uri.AbsoluteUri.Contains("/api/"),
+    Modifier = uri => {
+        var match = Regex.Match(uri.Path, "/api/(.+)service");
+        uri.Host = match.Groups[1].Value + "." + uri.Host;
+        uri.Path = uri.Path.Replace(match.Value, "/api/");
+    },
+    RequiresAuthentication = true
+}
 ```
 
 ##### Authentication
@@ -91,10 +91,10 @@ In the code below, we show the request URL, if it was proxied, and the time it t
 
 ```csharp
 proxyOptions.Reporter = r => {
-	logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
-	if (r.ProxyStatus == ProxyStatus.Proxied) {
-	    logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
-	}
+    logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
+    if (r.ProxyStatus == ProxyStatus.Proxied) {
+        logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
+    }
 };
 ```
 
