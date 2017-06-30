@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -43,7 +43,7 @@ namespace SharpReverseProxy {
             proxyRequest.Headers.Host = proxyRequest.RequestUri.Host;
             
             try {
-                await ProxyTheRequest(context, proxyRequest);
+                await ProxyTheRequest(context, proxyRequest, matchedRule);
             }
             catch (HttpRequestException) {
                 context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
@@ -51,24 +51,38 @@ namespace SharpReverseProxy {
             _options.Reporter.Invoke(resultBuilder.Proxied(proxyRequest.RequestUri, context.Response.StatusCode));
         }
 
-        private async Task ProxyTheRequest(HttpContext context, HttpRequestMessage proxyRequest) {
+        private async Task ProxyTheRequest(HttpContext context, HttpRequestMessage proxyRequest, ProxyRule proxyRule) {
             using (var responseMessage = await _httpClient.SendAsync(proxyRequest,
                                                                      HttpCompletionOption.ResponseHeadersRead,
                                                                      context.RequestAborted)) {
-                context.Response.StatusCode = (int) responseMessage.StatusCode;
-                foreach (var header in responseMessage.Headers) {
-                    context.Response.Headers[header.Key] = header.Value.ToArray();
+                if (proxyRule.PreProcessResponse && proxyRule.ResponseModifier != null)
+                {
+                    context.Response.StatusCode = (int)responseMessage.StatusCode;
+                    foreach (var header in responseMessage.Headers)
+                    {
+                        context.Response.Headers[header.Key] = header.Value.ToArray();
+                    }
+                    if (responseMessage.Content == null)
+                    {
+                        return;
+                    }
+                    foreach (var header in responseMessage.Content.Headers)
+                    {
+                        context.Response.Headers[header.Key] = header.Value.ToArray();
+                    }
+                    // SendAsync removes chunking from the response. 
+                    // This removes the header so it doesn't expect a chunked response.
+                    context.Response.Headers.Remove("transfer-encoding");
                 }
-                if (responseMessage.Content == null) {
-                    return;
+
+                if (proxyRule.ResponseModifier == null)
+                {
+                    await responseMessage.Content.CopyToAsync(context.Response.Body);
                 }
-                foreach (var header in responseMessage.Content.Headers) {
-                    context.Response.Headers[header.Key] = header.Value.ToArray();
+                else
+                {
+                    await proxyRule.ResponseModifier.Invoke(responseMessage, context);
                 }
-                // SendAsync removes chunking from the response. 
-                // This removes the header so it doesn't expect a chunked response.
-                context.Response.Headers.Remove("transfer-encoding");
-                await responseMessage.Content.CopyToAsync(context.Response.Body);
             }
         }
 
