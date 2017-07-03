@@ -7,6 +7,10 @@ Looking for a way to build an API Gateway based on rules, I found the [Asp.Net P
 
 The problem is that it proxies all request and I would like to have granular control of the proxy rules. So I wrote SharpReverseProxy. 😃
 
+
+[![Build status](https://ci.appveyor.com/api/projects/status/b8y5k1vxwybsdj1s?svg=true)](https://ci.appveyor.com/project/Andre/sharpreverseproxy)
+
+
 ## How to Use
 
 Install the [SharpReverseProxy package](https://www.nuget.org/packages/SharpReverseProxy/) via Nuget:
