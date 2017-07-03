@@ -65,7 +65,7 @@ namespace SampleWeb {
                 }
             },
             r => {
-                logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
+                logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elapsed}");
                 if (r.ProxyStatus == ProxyStatus.Proxied) {
                     logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
                 }

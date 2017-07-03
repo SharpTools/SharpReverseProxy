@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Powerful Reverse Proxy written as OWIN Middleware. Perfect for asp.net, web.api, microservices, etc.</Description>
@@ -14,6 +14,9 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageLicenseUrl>https://github.com/SharpTools/SharpReverseProxy/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SharpTools/SharpReverseProxy</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
