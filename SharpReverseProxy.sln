@@ -1,28 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{45306927-8BF0-4B67-A17E-BC2B9E13185E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6D7FF0F4-0898-4597-B28E-F0CCE416C097}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleWeb", "src\SampleWeb\SampleWeb.xproj", "{E1D41DEA-CF67-4D53-9F8F-890AF9558322}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleApi1", "src\SampleApi1\SampleApi1.xproj", "{5FA15D8F-B1B9-425D-9535-47F54530BEFC}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleApi2", "src\SampleApi2\SampleApi2.xproj", "{7D85A9EC-3C09-42FB-91BC-04E95E890F37}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SharpReverseProxy", "src\SharpReverseProxy\SharpReverseProxy.xproj", "{9058D441-59F9-43BA-A84A-72E51F78CFE7}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SampleApiAuthentication", "src\SampleApiAuthentication\SampleApiAuthentication.xproj", "{59C31257-CE3D-4BF2-8F57-F01CD6830B57}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0B37799F-0188-4F8A-978F-0A3BE98F15E0}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SharpReverseProxy.Tests", "test\SharpReverseProxy.Tests\SharpReverseProxy.Tests.xproj", "{02E9A359-2493-44D0-B136-65254F83153F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWeb", "src\SampleWeb\SampleWeb.csproj", "{E1D41DEA-CF67-4D53-9F8F-890AF9558322}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApi1", "src\SampleApi1\SampleApi1.csproj", "{5FA15D8F-B1B9-425D-9535-47F54530BEFC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApi2", "src\SampleApi2\SampleApi2.csproj", "{7D85A9EC-3C09-42FB-91BC-04E95E890F37}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpReverseProxy", "src\SharpReverseProxy\SharpReverseProxy.csproj", "{9058D441-59F9-43BA-A84A-72E51F78CFE7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApiAuthentication", "src\SampleApiAuthentication\SampleApiAuthentication.csproj", "{59C31257-CE3D-4BF2-8F57-F01CD6830B57}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpReverseProxy.Tests", "test\SharpReverseProxy.Tests\SharpReverseProxy.Tests.csproj", "{02E9A359-2493-44D0-B136-65254F83153F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
