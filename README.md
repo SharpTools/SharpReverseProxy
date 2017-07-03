@@ -41,7 +41,7 @@ public void Configure(IApplicationBuilder app,
         }
     },
     r => {
-        _logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
+        _logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elapsed}");
         if (r.ProxyStatus == ProxyStatus.Proxied) {
             _logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
         }
@@ -52,7 +52,7 @@ public void Configure(IApplicationBuilder app,
 ### Explanation:
 
 Add a proxy rule. You can create as many as you want and the proxy will use the first matched rule to divert the request.
-For every rule, define the matcher and the modifier:
+For every rule, define the matcher, the modifier and optinally a response modifier.
 
 #### Matcher
 
@@ -85,6 +85,71 @@ If you set `RequiresAuthentication = true`, the proxy will only act if the user 
 
 You have total control over proxying requests: have fun! 😃
 
+
+#### Response Modifier
+
+[Version 1.3](https://www.nuget.org/packages/SharpReverseProxy/1.3.0) adds the ability to modify the response providing a **ResponseModifier**. Thank you so much for [@vsimonia](https://github.com/vsimonian) for this PR :)
+
+This is extremely useful when:
+
+- Proxying a service that has its URL hardcoded, which needs to be replaced with the proxy URL so that links and references function properly.
+- Modifying the behaviour of an existing application or service in situations where there is no alternative.
+
+Here's an example of usage:
+
+
+```csharp
+new ProxyRule {
+    // ...
+    Modifier = (req, user) => {
+        req.RequestUri = new Uri(
+            $"https://www.example.com{req.RequestUri.PathAndQuery}"
+        );
+    },
+    ResponseModifier = async (msg, ctx) =>
+    {
+        ctx.Response.Headers.Remove("Strict-Transport-Security");
+        ctx.Response.Headers.Remove("Content-Security-Policy");
+        if (msg.StatusCode == System.Net.HttpStatusCode.OK)
+        {
+            switch (msg.Content.Headers.ContentType.MediaType)
+            {
+                case "text/html":
+                case "application/xhtml+xml":
+                case "application/javascript":
+                case "text/css":
+                    var body = Regex.Replace(
+                        await msg.Content.ReadAsStringAsync(),
+                        @"(http(s)?:)?//(?:www\.)?example.com",
+                        string.Format(
+                            "{0}://{1}",
+                            ctx.Request.Scheme,
+                            ctx.Request.Host
+                        ),
+                        RegexOptions.IgnoreCase
+                    );
+                    byte[] data = Encoding.UTF8.GetBytes(body);
+                    ctx.Response.ContentLength = data.Length;
+                    await ctx.Response.Body.WriteAsync(data, 0, data.Length);
+                    break;
+                default:
+                    await msg.Content.CopyToAsync(ctx.Response.Body);
+                    break;
+            }
+        }
+        else
+        {
+            await msg.Content.CopyToAsync(ctx.Response.Body);
+        }
+    }
+}
+```
+
+##### Skipping the default operations
+
+This version also adds the `PreProcessResponse` boolean, with a default value of `false`. If set to true, and a delegate is specified for `ResponseModifier`, default operations that modify the response sent to the user agent (such as copying headers from the originating server) are skipped.
+
+
 #### Reporter
 
 After every request, a `ProxyResult` is returned so you can log/take actions about what happened.
@@ -95,12 +160,13 @@ In the code below, we show the request URL, if it was proxied, and the time it t
 
 ```csharp
 proxyOptions.Reporter = r => {
-    logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elipsed}");
+    logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elapsed}");
     if (r.ProxyStatus == ProxyStatus.Proxied) {
         logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
     }
 };
 ```
+
 
 And that's it!
 
