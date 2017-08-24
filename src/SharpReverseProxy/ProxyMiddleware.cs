@@ -55,6 +55,9 @@ namespace SharpReverseProxy {
             using (var responseMessage = await _httpClient.SendAsync(proxyRequest,
                                                                      HttpCompletionOption.ResponseHeadersRead,
                                                                      context.RequestAborted)) {
+
+                context.Response.ContentType = responseMessage.Content?.Headers.ContentType?.MediaType;
+
                 if (proxyRule.PreProcessResponse && proxyRule.ResponseModifier != null)
                 {
                     context.Response.StatusCode = (int)responseMessage.StatusCode;
