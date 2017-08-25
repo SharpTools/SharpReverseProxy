@@ -105,5 +105,16 @@ namespace SharpReverseProxy.Tests {
             );
             Assert.AreEqual("Hello, world!", bodyText);
         }
+
+        [Test]
+        public async Task Should_Pass_ContentType()
+        {
+            _rules.Add(new ProxyRule
+            {
+                Matcher = uri => uri.AbsolutePath.Contains("api")
+            });
+            await _proxy.Invoke(_context);
+            Assert.AreEqual("application/json", _context.Response.ContentType);
+        }
     }
 }
