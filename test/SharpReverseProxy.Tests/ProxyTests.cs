@@ -5,7 +5,10 @@ using Microsoft.Extensions.Options;
 using NUnit.Framework;
 using SharpReverseProxy.Tests.HttpContextFakes;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Net.Http.Headers;
 
 namespace SharpReverseProxy.Tests {
     public class ProxyTests {
@@ -113,6 +116,15 @@ namespace SharpReverseProxy.Tests {
             {
                 Matcher = uri => uri.AbsolutePath.Contains("api")
             });
+           
+            _fakeHttpMessageHandler.ResponseMessageToReturn = new HttpResponseMessage {
+                Content = new MultipartFormDataContent {
+                    Headers = {
+                        ContentType = MediaTypeHeaderValue.Parse("application/json")
+                    }
+                },
+                StatusCode = HttpStatusCode.OK
+            };
             await _proxy.Invoke(_context);
             Assert.AreEqual("application/json", _context.Response.ContentType);
         }
