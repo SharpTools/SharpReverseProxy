@@ -147,7 +147,7 @@ new ProxyRule {
 
 ##### Skipping the default operations
 
-This version also adds the `PreProcessResponse` boolean, with a default value of `false`. If set to true, and a delegate is specified for `ResponseModifier`, default operations that modify the response sent to the user agent (such as copying headers from the originating server) are skipped.
+This version also adds the `PreProcessResponse` boolean, with a default value of `true`. If set to `false`, and a delegate is specified for `ResponseModifier`, default operations that modify the response sent to the user agent (such as copying headers from the originating server) are skipped and you have to do all the work yourself.
 
 
 #### Reporter
