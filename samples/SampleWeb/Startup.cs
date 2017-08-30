@@ -61,7 +61,7 @@ namespace SampleWeb {
                             Port = 5000
                         };
                         msg.RequestUri = uri.Uri;
-                    },
+                    }
                 }
             },
             r => {
