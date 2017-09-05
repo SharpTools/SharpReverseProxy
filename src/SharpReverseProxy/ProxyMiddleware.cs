@@ -14,7 +14,9 @@ namespace SharpReverseProxy {
         public ProxyMiddleware(RequestDelegate next, IOptions<ProxyOptions> options) {
             _next = next;
             _options = options.Value;
-            _httpClient = new HttpClient(_options.BackChannelMessageHandler ?? new HttpClientHandler());
+            _httpClient = new HttpClient(_options.BackChannelMessageHandler ?? new HttpClientHandler {
+                AllowAutoRedirect = _options.FollowRedirects
+            });
         }
 
         public async Task Invoke(HttpContext context) {

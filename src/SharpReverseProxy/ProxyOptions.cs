@@ -9,6 +9,8 @@ namespace SharpReverseProxy {
         public HttpMessageHandler BackChannelMessageHandler { get; set; }
         public Action<ProxyResult> Reporter { get; set; } = result => { };
 
+        public bool FollowRedirects { get; set; } = true;
+
         public ProxyOptions() {}
 
         public ProxyOptions(List<ProxyRule> rules, Action<ProxyResult> reporter = null) {

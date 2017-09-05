@@ -28,7 +28,7 @@ namespace SharpReverseProxy.Tests {
             _context = new HttpContextFake(_request, _response);
             _proxyOptions = new ProxyOptions(_rules);
             _proxyOptions.BackChannelMessageHandler = _fakeHttpMessageHandler;
-            
+
             var options = Options.Create(_proxyOptions);
             _proxy = new ProxyMiddleware(next => Task.FromResult(_request), options);
         }
