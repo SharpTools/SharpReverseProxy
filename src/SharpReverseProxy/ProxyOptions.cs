@@ -5,7 +5,7 @@ using System.Net.Http;
 
 namespace SharpReverseProxy {
     public class ProxyOptions {
-        public List<ProxyRule> ProxyRules { get; } = new List<ProxyRule>();
+        public List<ProxyRule> ProxyRules { get; set; } = new List<ProxyRule>();
         public HttpMessageHandler BackChannelMessageHandler { get; set; }
         public Action<ProxyResult> Reporter { get; set; } = result => { };
 

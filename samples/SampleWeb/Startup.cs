@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -32,44 +30,49 @@ namespace SampleWeb {
 
             ConfigureAuthentication(app);
 
-            app.UseProxy(new List<ProxyRule> {
-                new ProxyRule {
-                    Matcher = uri => uri.AbsoluteUri.Contains("/api1"),
-                    Modifier = (msg ,user) => {
-                        var uri = new UriBuilder(msg.RequestUri) {
-                            Port = 5001,
-                            Path = "/api/values"
-                        };
-                        msg.RequestUri = uri.Uri;
-                    }
-                },
-                new ProxyRule {
-                    Matcher = uri => uri.AbsoluteUri.Contains("/api2"),
-                    Modifier = (msg ,user) => {
-                        var uri = new UriBuilder(msg.RequestUri) {
-                            Port = 5002,
-                            Path = "/api/values" 
-                        };
-                        msg.RequestUri = uri.Uri;
+            var proxyOptions = new ProxyOptions {
+                ProxyRules = new List<ProxyRule> {
+                    new ProxyRule {
+                        Matcher = uri => uri.AbsoluteUri.Contains("/api1"),
+                        Modifier = (msg ,user) => {
+                            var uri = new UriBuilder(msg.RequestUri) {
+                                Port = 5001,
+                                Path = "/api/values"
+                            };
+                            msg.RequestUri = uri.Uri;
+                        }
                     },
-                    RequiresAuthentication = true
-                },
-                new ProxyRule {
-                    Matcher = uri => uri.AbsoluteUri.Contains("/authenticate"),
-                    Modifier = (msg ,user) => {
-                        var uri = new UriBuilder(msg.RequestUri) {
-                            Port = 5000
-                        };
-                        msg.RequestUri = uri.Uri;
+                    new ProxyRule {
+                        Matcher = uri => uri.AbsoluteUri.Contains("/api2"),
+                        Modifier = (msg ,user) => {
+                            var uri = new UriBuilder(msg.RequestUri) {
+                                Port = 5002,
+                                Path = "/api/values"
+                            };
+                            msg.RequestUri = uri.Uri;
+                        },
+                        RequiresAuthentication = true
+                    },
+                    new ProxyRule {
+                        Matcher = uri => uri.AbsoluteUri.Contains("/authenticate"),
+                        Modifier = (msg ,user) => {
+                            var uri = new UriBuilder(msg.RequestUri) {
+                                Port = 5000
+                            };
+                            msg.RequestUri = uri.Uri;
+                        }
                     }
-                }
-            },
-            r => {
-                logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elapsed}");
-                if (r.ProxyStatus == ProxyStatus.Proxied) {
-                    logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
-                }
-            });
+                },
+                Reporter = r => {
+                    logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elapsed}");
+                    if (r.ProxyStatus == ProxyStatus.Proxied) {
+                        logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
+                    }
+                },
+                FollowRedirects = false
+            };
+
+            app.UseProxy(proxyOptions);
 
             app.Run(async (context) => {
                 await context.Response.WriteAsync("Hello World!");
