@@ -10,6 +10,9 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="HttpContextFakes\StreamFake.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\SharpReverseProxy\SharpReverseProxy.csproj" />
   </ItemGroup>
   <ItemGroup>
