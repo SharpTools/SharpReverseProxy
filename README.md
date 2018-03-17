@@ -167,7 +167,6 @@ proxyOptions.Reporter = r => {
 };
 ```
 
-
 And that's it!
 
 Heavily inspired by https://github.com/aspnet/Proxy
