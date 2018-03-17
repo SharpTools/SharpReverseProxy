@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 namespace SharpReverseProxy {
     public class ProxyRule {
         public Func<Uri, bool> Matcher { get; set; } = uri => false;
-        public Action<HttpRequestMessage, ClaimsPrincipal> Modifier { get; set; } = (msg, user) => { };
+        public Action<HttpRequestMessage, HttpContext> Modifier { get; set; } = (msg, ctx) => { };
         public Func<HttpResponseMessage, HttpContext, Task> ResponseModifier { get; set; } = null;
         public bool PreProcessResponse { get; set; } = true;
         public bool RequiresAuthentication { get; set; }
-        public Action<HttpContext, HttpClient> RequestModifier { get; set; } = (ctx, httpClient) => { };
     }
 }
