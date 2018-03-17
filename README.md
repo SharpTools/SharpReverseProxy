@@ -167,6 +167,35 @@ proxyOptions.Reporter = r => {
 };
 ```
 
+#### Request Modifier
+
+`Action<HttpContext, HttpClient> RequestModifier`: provides more low level access for modifying the proxied request. 
+
+For example: 
+
+- When you want to inject `Bearer` token in multi-services scenario without exposing the token to client's  Javascript.
+
+Here's an example of usage:
+
+```csharp
+new ProxyRule {
+    // ...
+    Modifier = (req, user) => {
+        req.RequestUri = new Uri(
+            $"https://protected-backend.com{req.RequestUri.PathAndQuery}"
+        );
+    },
+    RequestModifier = async (ctx, client) =>
+    {
+        var user = ctx.User;
+		if(user != null && user.Identity.IsAuthenticated)
+		{
+		    var accessToken = await context.GetTokenAsync("access_token");
+			client.SetBearerToken(accessToken);
+		}
+    }
+}
+```
 
 And that's it!
 

@@ -11,5 +11,6 @@ namespace SharpReverseProxy {
         public Func<HttpResponseMessage, HttpContext, Task> ResponseModifier { get; set; } = null;
         public bool PreProcessResponse { get; set; } = true;
         public bool RequiresAuthentication { get; set; }
+        public Action<HttpContext, HttpClient> RequestModifier { get; set; } = (ctx, httpClient) => { };
     }
 }

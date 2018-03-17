@@ -40,6 +40,7 @@ namespace SharpReverseProxy {
             SetProxyRequestBody(proxyRequest, context);
             SetProxyRequestHeaders(proxyRequest, context);
 
+            matchedRule.RequestModifier.Invoke(context, _httpClient);
             matchedRule.Modifier.Invoke(proxyRequest, context.User);
             proxyRequest.Headers.Host = proxyRequest.RequestUri.Host;
 
