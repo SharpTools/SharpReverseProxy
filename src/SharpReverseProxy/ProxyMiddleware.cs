@@ -104,6 +104,12 @@ namespace SharpReverseProxy {
                     requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
                 }
             }
+
+            if (_options.AddForwardedHeader) {
+                requestMessage.Headers.TryAddWithoutValidation("Forwarded", $"for={context.Connection.RemoteIpAddress}");
+                requestMessage.Headers.TryAddWithoutValidation("Forwarded", $"host={requestMessage.Headers.Host}");
+                requestMessage.Headers.TryAddWithoutValidation("Forwarded", string.Format("proto={0}", context.Request.IsHttps ? "https" : "http"));
+            }
         }
 
         private bool UserIsAuthenticated(HttpContext context) {
