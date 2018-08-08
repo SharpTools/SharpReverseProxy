@@ -41,7 +41,10 @@ namespace SharpReverseProxy {
             SetProxyRequestHeaders(proxyRequest, context);
 
             matchedRule.Modifier.Invoke(proxyRequest, context.User);
-            proxyRequest.Headers.Host = proxyRequest.RequestUri.Host;
+
+            proxyRequest.Headers.Host = !proxyRequest.RequestUri.IsDefaultPort 
+                ? $"{proxyRequest.RequestUri.Host}:{proxyRequest.RequestUri.Port}"
+                : proxyRequest.RequestUri.Host;
 
             try {
                 await ProxyTheRequest(context, proxyRequest, matchedRule);
