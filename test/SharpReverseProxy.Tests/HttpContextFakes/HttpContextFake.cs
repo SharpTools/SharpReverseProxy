@@ -12,6 +12,9 @@ namespace SharpReverseProxy.Tests.HttpContextFakes {
             request.SetHttpContext(this);
             Request = request;
             Response = response ?? new HttpResponseFake();
+            Connection = new ConnectionInfoFake {
+                RemoteIpAddress = new System.Net.IPAddress(new byte[] { 127, 0, 0, 1 })
+            };
         }
 
         public override void Abort() {}

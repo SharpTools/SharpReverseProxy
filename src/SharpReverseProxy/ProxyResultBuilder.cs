@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace SharpReverseProxy {
     public class ProxyResultBuilder {
-        private ProxyResult _result;
-        private DateTime _start;
+        private readonly ProxyResult _result;
+        private readonly DateTime _start;
+
         public ProxyResultBuilder(Uri originalUri) {
             _result = new ProxyResult {
                 OriginalUri = originalUri
@@ -13,28 +14,45 @@ namespace SharpReverseProxy {
         }
 
         public ProxyResult Proxied(Uri proxiedUri, int statusCode) {
-            Finish(ProxyStatus.Proxied);
             _result.ProxiedUri = proxiedUri;
             _result.HttpStatusCode = statusCode;
+            Finish(ProxyStatus.Proxied);
             return _result;
         }
 
         public ProxyResult NotProxied(int statusCode) {
-            Finish(ProxyStatus.NotProxied);
             _result.HttpStatusCode = statusCode;
+            Finish(ProxyStatus.NotProxied);
+            return _result;
+        }
+
+        public ProxyResult OperationCancelled(OperationCanceledException exception) {
+            _result.Exception = exception;
+            Finish(ProxyStatus.Cancelled);
+            return _result;
+        }
+        
+        public ProxyResult DownstreamServerError(Exception exception) {
+            _result.Exception = exception;
+            Finish(ProxyStatus.DownstreamServerError);
+            return _result;
+        }
+
+        public ProxyResult ProxyError(Exception exception) {
+            _result.Exception = exception;
+            Finish(ProxyStatus.ProxyError);
             return _result;
         }
 
         public ProxyResult NotAuthenticated() {
-            Finish(ProxyStatus.NotAuthenticated);
             _result.HttpStatusCode = StatusCodes.Status401Unauthorized;
+            Finish(ProxyStatus.NotAuthenticated);
             return _result;
         }
 
-        private ProxyResult Finish(ProxyStatus proxyStatus) {
+        private void Finish(ProxyStatus proxyStatus) {
             _result.ProxyStatus = proxyStatus;
             _result.Elapsed = DateTime.Now - _start;
-            return _result;
         }
     }
 }

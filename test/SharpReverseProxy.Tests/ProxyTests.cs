@@ -27,7 +27,9 @@ namespace SharpReverseProxy.Tests {
             _response = new HttpResponseFake();
             _context = new HttpContextFake(_request, _response);
             _proxyOptions = new ProxyOptions(_rules);
-            _proxyOptions.BackChannelMessageHandler = _fakeHttpMessageHandler;
+
+            var httpClient = new HttpClient(_fakeHttpMessageHandler);
+            _proxyOptions.DefaultHttpClient = httpClient;
 
             var options = Options.Create(_proxyOptions);
             _proxy = new ProxyMiddleware(next => Task.FromResult(_request), options);
@@ -37,8 +39,8 @@ namespace SharpReverseProxy.Tests {
         public async Task Should_match_simple_rule() {
             var matched = false;
             _rules.Add(new ProxyRule {
-                Matcher = uri => uri.AbsolutePath.Contains("api"),
-                Modifier = (msg, user) => { matched = true; }
+                Matcher = async r => r.GetUrl().Contains("api"),
+                RequestModifier = async (msg, user) => { matched = true; }
             });
             await _proxy.Invoke(_context);
             Assert.IsTrue(matched);
@@ -48,10 +50,10 @@ namespace SharpReverseProxy.Tests {
         public async Task Should_not_match_any_rule() {
             var matched = false;
             ProxyResult result = null;
-            _proxyOptions.Reporter = r => result = r;
+            _proxyOptions.Reporter = async r => result = r;
             _rules.Add(new ProxyRule {
-                Matcher = uri => false,
-                Modifier = (msg, user) => { matched = true; }
+                Matcher = async uri => false,
+                RequestModifier = async (msg, user) => { matched = true; }
             });
             await _proxy.Invoke(_context);
             Assert.IsFalse(matched);
@@ -65,10 +67,10 @@ namespace SharpReverseProxy.Tests {
             var targetUri = new Uri("http://myotherserver.com/api/user");
             ProxyResult result = null;
             _rules.Add(new ProxyRule {
-                Matcher = uri => uri.AbsolutePath.Contains("api"),
-                Modifier = (msg, user) => { msg.RequestUri = targetUri; }
+                Matcher = async r => r.GetUrl().Contains("api"),
+                RequestModifier = async (msg, user) => { msg.RequestUri = targetUri; }
             });
-            _proxyOptions.Reporter = r => result = r;
+            _proxyOptions.Reporter = async r => result = r;
             await _proxy.Invoke(_context);
 
             Assert.IsNotNull(result);
@@ -80,8 +82,8 @@ namespace SharpReverseProxy.Tests {
         [Test]
         public async Task Should_pass_all_headers() {
             _rules.Add(new ProxyRule {
-                Matcher = uri => uri.AbsolutePath.Contains("api"),
-                Modifier = (msg, user) => { }
+                Matcher = async r => r.GetUrl().Contains("api"),
+                RequestModifier = async (msg, user) => { }
             });
             await _proxy.Invoke(_context);
 
@@ -96,7 +98,7 @@ namespace SharpReverseProxy.Tests {
         [Test]
         public async Task Should_pass_contentType() {
             _rules.Add(new ProxyRule {
-                Matcher = uri => uri.AbsolutePath.Contains("api")
+                Matcher = async r => r.GetUrl().Contains("api"),
             });
             _fakeHttpMessageHandler.ResponseMessageToReturn.Content =
                 new MultipartFormDataContent {
@@ -111,8 +113,8 @@ namespace SharpReverseProxy.Tests {
         [Test]
         public async Task Should_call_responseModifier_if_set() {
             _rules.Add(new ProxyRule {
-                Matcher = uri => uri.AbsolutePath.Contains("api"),
-                Modifier = (msg, user) => { },
+                Matcher = async r => r.GetUrl().Contains("api"),
+                RequestModifier = async (msg, user) => { },
                 ResponseModifier = async (res, ctx) => {
                     var bytes = Encoding.UTF8.GetBytes("Hello, world!");
                     await ctx.Response.Body.WriteAsync(bytes, 0, bytes.Length);
@@ -123,38 +125,6 @@ namespace SharpReverseProxy.Tests {
             var body = (MemoryStream)_response.Body;
             var bodyText = Encoding.UTF8.GetString(body.ToArray());
             Assert.AreEqual("Hello, world!", bodyText);
-        }
-
-        [Test]
-        public async Task Should_provide_clean_response_if_preProcessResponse_is_false() {
-            _fakeHttpMessageHandler.ResponseMessageToReturn
-                                   .Headers.Add("foo", "bar");
-
-            _rules.Add(new ProxyRule {
-                Matcher = uri => uri.AbsolutePath.Contains("api"),
-                PreProcessResponse = false,
-                ResponseModifier = async (res, ctx) => {
-                    var bytes = Encoding.UTF8.GetBytes("Hello, world!");
-                    await ctx.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-                }
-            });
-            await _proxy.Invoke(_context);
-
-            Assert.AreEqual(0, _context.Response.Headers.Count);
-        }
-
-        [Test]
-        public async Task Should_pass_full_response_if_preProcessResponse_is_false_and_no_responseModifier_is_provided() {
-            _fakeHttpMessageHandler.ResponseMessageToReturn
-                                   .Headers.Add("foo", "bar");
-
-            _rules.Add(new ProxyRule {
-                Matcher = uri => uri.AbsolutePath.Contains("api"),
-                PreProcessResponse = false
-            });
-            await _proxy.Invoke(_context);
-
-            Assert.AreEqual(1, _context.Response.Headers.Count);
         }
     }
 }

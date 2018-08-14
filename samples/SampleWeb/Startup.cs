@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,16 +6,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SampleWeb.Authentication;
 using SharpReverseProxy;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SampleWeb {
     public class Startup {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services) {
             services.AddAuthentication();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory) {
             loggerFactory.AddConsole();
             loggerFactory.AddDebug(LogLevel.Debug);
@@ -33,8 +31,8 @@ namespace SampleWeb {
             var proxyOptions = new ProxyOptions {
                 ProxyRules = new List<ProxyRule> {
                     new ProxyRule {
-                        Matcher = uri => uri.AbsoluteUri.Contains("/api1"),
-                        Modifier = (msg ,user) => {
+                        Matcher = r => MatchBy.Url(r, url => url.Contains("/api1")),
+                        RequestModifier = async (msg ,user) => {
                             var uri = new UriBuilder(msg.RequestUri) {
                                 Port = 5001,
                                 Path = "/api/values"
@@ -43,8 +41,8 @@ namespace SampleWeb {
                         }
                     },
                     new ProxyRule {
-                        Matcher = uri => uri.AbsoluteUri.Contains("/api2"),
-                        Modifier = (msg ,user) => {
+                        Matcher = r => MatchBy.Url(r, url => url.Contains("/api2")),
+                        RequestModifier = async (msg ,user) => {
                             var uri = new UriBuilder(msg.RequestUri) {
                                 Port = 5002,
                                 Path = "/api/values"
@@ -54,8 +52,24 @@ namespace SampleWeb {
                         RequiresAuthentication = true
                     },
                     new ProxyRule {
-                        Matcher = uri => uri.AbsoluteUri.Contains("/authenticate"),
-                        Modifier = (msg ,user) => {
+                        Matcher = r => MatchBy.Url(r, url => url.Contains("/api3")),
+                        CopyResponseBody = false,
+                        ResponseModifier = (resp, ctx) => ModifyResponse.ReplaceDomainWhenText(resp, ctx, "example.com")
+                    },
+                    new ProxyRule {
+                        Matcher = r => MatchBy.Header(r, headers => headers.ContainsKey("SomeHeader")),
+                        RequestModifier = async (msg ,user) => {
+                            var uri = new UriBuilder(msg.RequestUri) {
+                                Port = 5002,
+                                Path = "/api/values"
+                            };
+                            msg.RequestUri = uri.Uri;
+                        },
+                        RequiresAuthentication = true
+                    },
+                    new ProxyRule {
+                        Matcher= r => MatchBy.Url(r, url => url.Contains("/authenticate")),
+                        RequestModifier = async (msg ,user) => {
                             var uri = new UriBuilder(msg.RequestUri) {
                                 Port = 5000
                             };
@@ -63,13 +77,12 @@ namespace SampleWeb {
                         }
                     }
                 },
-                Reporter = r => {
+                Reporter = async r => {
                     logger.LogDebug($"Proxy: {r.ProxyStatus} Url: {r.OriginalUri} Time: {r.Elapsed}");
                     if (r.ProxyStatus == ProxyStatus.Proxied) {
                         logger.LogDebug($"        New Url: {r.ProxiedUri.AbsoluteUri} Status: {r.HttpStatusCode}");
                     }
-                },
-                FollowRedirects = false
+                }
             };
 
             app.UseProxy(proxyOptions);

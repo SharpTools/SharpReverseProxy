@@ -5,11 +5,18 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SharpReverseProxy {
+
     public class ProxyRule {
-        public Func<Uri, bool> Matcher { get; set; } = uri => false;
-        public Action<HttpRequestMessage, ClaimsPrincipal> Modifier { get; set; } = (msg, user) => { };
-        public Func<HttpResponseMessage, HttpContext, Task> ResponseModifier { get; set; } = null;
-        public bool PreProcessResponse { get; set; } = true;
         public bool RequiresAuthentication { get; set; }
+        public bool AddForwardedHeader { get; set; } = true;
+        public HttpClient RuleHttpClient { get; set; }
+        public Func<HttpRequest, Task<bool>> Matcher { get; set; } = request => Task.FromResult(false);
+        public bool CopyRequestHeaders { get; set; } = true;
+        public bool CopyRequestBody { get; set; } = true;
+        public Func<HttpRequestMessage, ClaimsPrincipal, Task> RequestModifier { get; set; }
+
+        public bool CopyResponseHeaders { get; set; } = true;
+        public bool CopyResponseBody { get; set; } = true;
+        public Func<HttpResponseMessage, HttpContext, Task> ResponseModifier { get; set; }
     }
 }

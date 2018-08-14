@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 
@@ -16,7 +17,7 @@ namespace SharpReverseProxy {
             return app.UseMiddleware<ProxyMiddleware>(Options.Create(proxyOptions));
         }
 
-        public static IApplicationBuilder UseProxy(this IApplicationBuilder app, List<ProxyRule> rules, Action<ProxyResult> reporter = null) {
+        public static IApplicationBuilder UseProxy(this IApplicationBuilder app, List<ProxyRule> rules, Func<ProxyResult, Task> reporter = null) {
             return app.UseMiddleware<ProxyMiddleware>(Options.Create(new ProxyOptions(rules, reporter)));
         }
     }
