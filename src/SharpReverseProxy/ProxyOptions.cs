@@ -10,6 +10,7 @@ namespace SharpReverseProxy {
         public Action<ProxyResult> Reporter { get; set; } = result => { };
 
         public bool FollowRedirects { get; set; } = true;
+        public bool AddForwardedHeader { get; set; } = false;
 
         public ProxyOptions() {}
 
