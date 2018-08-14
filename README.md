@@ -128,6 +128,7 @@ new ProxyRule {
                         ),
                         RegexOptions.IgnoreCase
                     );
+                    ctx.Response.ContentType = msg.Content.Headers.ContentType?.MediaType;
                     byte[] data = Encoding.UTF8.GetBytes(body);
                     ctx.Response.ContentLength = data.Length;
                     await ctx.Response.Body.WriteAsync(data, 0, data.Length);
