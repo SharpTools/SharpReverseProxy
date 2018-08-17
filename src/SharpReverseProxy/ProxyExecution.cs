@@ -34,6 +34,7 @@ namespace SharpReverseProxy {
             foreach(var proxyRule in _options.ProxyRules) {
                 if(await proxyRule.Matcher(_context.Request)) {
                     _matchedRule = proxyRule;
+                    break;
                 }
             }
             if (_matchedRule != null) {

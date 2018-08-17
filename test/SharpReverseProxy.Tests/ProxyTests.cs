@@ -126,5 +126,20 @@ namespace SharpReverseProxy.Tests {
             var bodyText = Encoding.UTF8.GetString(body.ToArray());
             Assert.AreEqual("Hello, world!", bodyText);
         }
+
+        [Test]
+        public async Task Should_stop_evaluating_rules_on_first_match() {
+            var matched = 0;
+            _rules.Add(new ProxyRule {
+                Matcher = async r => r.GetUrl().Contains("api"),
+                RequestModifier = async (msg, user) => { matched = 1; }
+            });
+            _rules.Add(new ProxyRule {
+                Matcher = async r => r.GetUrl().Contains("api"),
+                RequestModifier = async (msg, user) => { matched = 2; }
+            });
+            await _proxy.Invoke(_context);
+            Assert.AreEqual(1, matched);
+        }
     }
 }
