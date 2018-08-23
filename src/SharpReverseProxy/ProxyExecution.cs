@@ -16,8 +16,8 @@ namespace SharpReverseProxy {
         private HttpRequestMessage _request;
         private HttpResponseMessage _response;
 
-        public async Task<bool> Invoke(RequestDelegate next, 
-                                       HttpContext context, 
+        public async Task<bool> Invoke(RequestDelegate next,
+                                       HttpContext context,
                                        ProxyOptions options) {
             _next = next;
             _context = context;
@@ -31,8 +31,12 @@ namespace SharpReverseProxy {
         }
 
         private async Task<bool> ProxyRuleIsMatched() {
-            foreach(var proxyRule in _options.ProxyRules) {
-                if(await proxyRule.Matcher(_context.Request)) {
+            var matcherContext = new MatcherContext {
+                HttpRequest = _context.Request,
+                ServiceProvider = _context.RequestServices
+            };
+            foreach (var proxyRule in _options.ProxyRules) {
+                if (await proxyRule.Matcher(matcherContext)) {
                     _matchedRule = proxyRule;
                     break;
                 }
@@ -61,9 +65,9 @@ namespace SharpReverseProxy {
         public async Task<bool> CreateInternalRequest() {
             _request = new HttpRequestMessage(new HttpMethod(_context.Request.Method),
                                                              _context.Request.GetUri());
+            CopyRequestBody();
             CopyRequestHeaders();
             AddForwardedHeader();
-            CopyRequestBody();
             await ApplyModificationsToRequest();
             SetRequestHost();
             return true;
@@ -104,10 +108,15 @@ namespace SharpReverseProxy {
         }
 
         private async Task ApplyModificationsToRequest() {
-            if(_matchedRule.RequestModifier == null) {
+            if (_matchedRule.RequestModifier == null) {
                 return;
             }
-            await _matchedRule.RequestModifier(_request, _context.User);
+            var requestModifierContext = new RequestModifierContext {
+                HttpRequestMessage = _request,
+                LoggerUser = _context.User,
+                ServiceProvider = _context.RequestServices
+            };
+            await _matchedRule.RequestModifier(requestModifierContext);
         }
 
         private void SetRequestHost() {
@@ -126,7 +135,7 @@ namespace SharpReverseProxy {
                     RemoveTransferEncodingHeader();
                     await CopyResponseBody();
                     await ApplyModificationsToResponse();
-                    await _options.Reporter.Invoke(_proxyResultBuilder.Proxied(_request.RequestUri, 
+                    await _options.Reporter.Invoke(_proxyResultBuilder.Proxied(_request.RequestUri,
                                                                                _context.Response.StatusCode));
                 }
                 return true;
@@ -146,7 +155,7 @@ namespace SharpReverseProxy {
                 return false;
             }
         }
-        
+
         private HttpClient GetHttpClient() {
             return _matchedRule.RuleHttpClient ?? _options.DefaultHttpClient;
         }
@@ -177,10 +186,15 @@ namespace SharpReverseProxy {
         }
 
         private async Task ApplyModificationsToResponse() {
-            if(_matchedRule.ResponseModifier == null) {
+            if (_matchedRule.ResponseModifier == null) {
                 return;
             }
-            await _matchedRule.ResponseModifier(_response, _context);
+            var responseModifierContext = new ResponseModifierContext {
+                HttpResponseMessage = _response,
+                HttpContext = _context,
+                ServiceProvider = _context.RequestServices
+            };
+            await _matchedRule.ResponseModifier(responseModifierContext);
         }
     }
 }

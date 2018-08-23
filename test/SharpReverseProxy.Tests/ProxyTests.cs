@@ -39,8 +39,8 @@ namespace SharpReverseProxy.Tests {
         public async Task Should_match_simple_rule() {
             var matched = false;
             _rules.Add(new ProxyRule {
-                Matcher = async r => r.GetUrl().Contains("api"),
-                RequestModifier = async (msg, user) => { matched = true; }
+                Matcher = async c => c.Url.Contains("api"),
+                RequestModifier = async c => { matched = true; }
             });
             await _proxy.Invoke(_context);
             Assert.IsTrue(matched);
@@ -53,7 +53,7 @@ namespace SharpReverseProxy.Tests {
             _proxyOptions.Reporter = async r => result = r;
             _rules.Add(new ProxyRule {
                 Matcher = async uri => false,
-                RequestModifier = async (msg, user) => { matched = true; }
+                RequestModifier = async c => { matched = true; }
             });
             await _proxy.Invoke(_context);
             Assert.IsFalse(matched);
@@ -67,8 +67,8 @@ namespace SharpReverseProxy.Tests {
             var targetUri = new Uri("http://myotherserver.com/api/user");
             ProxyResult result = null;
             _rules.Add(new ProxyRule {
-                Matcher = async r => r.GetUrl().Contains("api"),
-                RequestModifier = async (msg, user) => { msg.RequestUri = targetUri; }
+                Matcher = async c => c.Url.Contains("api"),
+                RequestModifier = async c => { c.HttpRequestMessage.RequestUri = targetUri; }
             });
             _proxyOptions.Reporter = async r => result = r;
             await _proxy.Invoke(_context);
@@ -82,8 +82,8 @@ namespace SharpReverseProxy.Tests {
         [Test]
         public async Task Should_pass_all_headers() {
             _rules.Add(new ProxyRule {
-                Matcher = async r => r.GetUrl().Contains("api"),
-                RequestModifier = async (msg, user) => { }
+                Matcher = async c => c.Url.Contains("api"),
+                RequestModifier = async c => { }
             });
             await _proxy.Invoke(_context);
 
@@ -98,7 +98,7 @@ namespace SharpReverseProxy.Tests {
         [Test]
         public async Task Should_pass_contentType() {
             _rules.Add(new ProxyRule {
-                Matcher = async r => r.GetUrl().Contains("api"),
+                Matcher = async c => c.Url.Contains("api"),
             });
             _fakeHttpMessageHandler.ResponseMessageToReturn.Content =
                 new MultipartFormDataContent {
@@ -113,11 +113,11 @@ namespace SharpReverseProxy.Tests {
         [Test]
         public async Task Should_call_responseModifier_if_set() {
             _rules.Add(new ProxyRule {
-                Matcher = async r => r.GetUrl().Contains("api"),
-                RequestModifier = async (msg, user) => { },
-                ResponseModifier = async (res, ctx) => {
+                Matcher = async c => c.Url.Contains("api"),
+                RequestModifier = async c => { },
+                ResponseModifier = async c => {
                     var bytes = Encoding.UTF8.GetBytes("Hello, world!");
-                    await ctx.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+                    await c.HttpContext.Response.Body.WriteAsync(bytes, 0, bytes.Length);
                 }
             });
             await _proxy.Invoke(_context);
@@ -131,12 +131,12 @@ namespace SharpReverseProxy.Tests {
         public async Task Should_stop_evaluating_rules_on_first_match() {
             var matched = 0;
             _rules.Add(new ProxyRule {
-                Matcher = async r => r.GetUrl().Contains("api"),
-                RequestModifier = async (msg, user) => { matched = 1; }
+                Matcher = async c => c.Url.Contains("api"),
+                RequestModifier = async c => { matched = 1; }
             });
             _rules.Add(new ProxyRule {
-                Matcher = async r => r.GetUrl().Contains("api"),
-                RequestModifier = async (msg, user) => { matched = 2; }
+                Matcher = async c => c.Url.Contains("api"),
+                RequestModifier = async c => { matched = 2; }
             });
             await _proxy.Invoke(_context);
             Assert.AreEqual(1, matched);
