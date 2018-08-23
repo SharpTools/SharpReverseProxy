@@ -31,49 +31,51 @@ namespace SampleWeb {
             var proxyOptions = new ProxyOptions {
                 ProxyRules = new List<ProxyRule> {
                     new ProxyRule {
-                        Matcher = r => MatchBy.Url(r, url => url.Contains("/api1")),
-                        RequestModifier = async (msg ,user) => {
-                            var uri = new UriBuilder(msg.RequestUri) {
+                        Matcher = async c => c.Url.Contains("/api1"),
+                        RequestModifier = async c => {
+                            var uri = new UriBuilder(c.HttpRequestMessage.RequestUri) {
                                 Port = 5001,
                                 Path = "/api/values"
                             };
-                            msg.RequestUri = uri.Uri;
+                            c.HttpRequestMessage.RequestUri = uri.Uri;
                         }
                     },
                     new ProxyRule {
-                        Matcher = r => MatchBy.Url(r, url => url.Contains("/api2")),
-                        RequestModifier = async (msg ,user) => {
-                            var uri = new UriBuilder(msg.RequestUri) {
+                        Matcher = async c => c.Url.Contains("/api2"),
+                        RequestModifier = async c => {
+                            var uri = new UriBuilder(c.HttpRequestMessage.RequestUri) {
                                 Port = 5002,
                                 Path = "/api/values"
                             };
-                            msg.RequestUri = uri.Uri;
+                            c.HttpRequestMessage.RequestUri = uri.Uri;
                         },
                         RequiresAuthentication = true
                     },
                     new ProxyRule {
-                        Matcher = r => MatchBy.Url(r, url => url.Contains("/api3")),
+                        Matcher = async c => c.Url.Contains("/api3"),
                         CopyResponseBody = false,
-                        ResponseModifier = (resp, ctx) => ModifyResponse.ReplaceDomainWhenText(resp, ctx, "example.com")
+                        ResponseModifier = c => ModifyResponse.ReplaceDomainWhenText(c.HttpResponseMessage, 
+                                                                                     c.HttpContext, 
+                                                                                     "example.com")
                     },
                     new ProxyRule {
-                        Matcher = r => MatchBy.Header(r, headers => headers.ContainsKey("SomeHeader")),
-                        RequestModifier = async (msg ,user) => {
-                            var uri = new UriBuilder(msg.RequestUri) {
+                        Matcher = async c => c.HttpRequest.Headers.ContainsKey("SomeHeader"),
+                        RequestModifier = async c => {
+                            var uri = new UriBuilder(c.HttpRequestMessage.RequestUri) {
                                 Port = 5002,
                                 Path = "/api/values"
                             };
-                            msg.RequestUri = uri.Uri;
+                            c.HttpRequestMessage.RequestUri = uri.Uri;
                         },
                         RequiresAuthentication = true
                     },
                     new ProxyRule {
-                        Matcher= r => MatchBy.Url(r, url => url.Contains("/authenticate")),
-                        RequestModifier = async (msg ,user) => {
-                            var uri = new UriBuilder(msg.RequestUri) {
+                        Matcher = async c => c.Url.Contains("/authenticate"),
+                        RequestModifier = async c => {
+                            var uri = new UriBuilder(c.HttpRequestMessage.RequestUri) {
                                 Port = 5000
                             };
-                            msg.RequestUri = uri.Uri;
+                            c.HttpRequestMessage.RequestUri = uri.Uri;
                         }
                     }
                 },
