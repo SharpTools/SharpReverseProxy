@@ -5,12 +5,14 @@ namespace SharpReverseProxy {
     public class ProxyResultBuilder {
         private readonly ProxyResult _result;
         private readonly DateTime _start;
+        private readonly HttpContext _httpContext;
 
-        public ProxyResultBuilder(Uri originalUri) {
+        public ProxyResultBuilder(HttpContext httpContext) {
             _result = new ProxyResult {
-                OriginalUri = originalUri
+                OriginalUri = httpContext.Request.GetUri()
             };
             _start = DateTime.Now;
+            _httpContext = httpContext;
         }
 
         public ProxyResult Proxied(Uri proxiedUri, int statusCode) {
@@ -53,6 +55,7 @@ namespace SharpReverseProxy {
         private void Finish(ProxyStatus proxyStatus) {
             _result.ProxyStatus = proxyStatus;
             _result.Elapsed = DateTime.Now - _start;
+            _result.HttpContext = _httpContext;
         }
     }
 }

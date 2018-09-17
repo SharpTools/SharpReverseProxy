@@ -9,7 +9,11 @@ namespace SharpReverseProxy {
         public bool RequiresAuthentication { get; set; }
         public bool AddForwardedHeader { get; set; } = true;
         public HttpClient RuleHttpClient { get; set; }
+
         public Func<MatcherContext, Task<bool>> Matcher { get; set; } = request => Task.FromResult(false);
+
+        public Func<RequestBlockerContext, Task<RequestBlockerResult>> RequestBlocker { get; set; }
+
         public bool CopyRequestHeaders { get; set; } = true;
         public bool CopyRequestBody { get; set; } = true;
         public Func<RequestModifierContext, Task> RequestModifier { get; set; }

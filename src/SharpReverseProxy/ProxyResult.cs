@@ -1,5 +1,5 @@
+using Microsoft.AspNetCore.Http;
 using System;
-using System.Net;
 
 namespace SharpReverseProxy {
     public class ProxyResult {
@@ -9,5 +9,6 @@ namespace SharpReverseProxy {
         public Uri ProxiedUri { get; set; }
         public Exception Exception { get; set; }
         public TimeSpan Elapsed { get; set; }
+        public HttpContext HttpContext { get; set; }
     }
 }

@@ -16,27 +16,28 @@ namespace SharpReverseProxy {
         private HttpRequestMessage _request;
         private HttpResponseMessage _response;
 
-        public async Task<bool> Invoke(RequestDelegate next,
-                                       HttpContext context,
+        public async Task<bool> Invoke(RequestDelegate next, 
+                                       HttpContext context, 
                                        ProxyOptions options) {
             _next = next;
             _context = context;
             _options = options;
-            _proxyResultBuilder = new ProxyResultBuilder(_context.Request.GetUri());
+            _proxyResultBuilder = new ProxyResultBuilder(_context);
 
             return await ProxyRuleIsMatched() &&
                    await PassesAuthentication() &&
+                   await RequestIsNotBlocked() &&
                    await CreateInternalRequest() &&
                    await ProxyTheRequest();
         }
-
+        
         private async Task<bool> ProxyRuleIsMatched() {
             var matcherContext = new MatcherContext {
                 HttpRequest = _context.Request,
                 ServiceProvider = _context.RequestServices
             };
             foreach (var proxyRule in _options.ProxyRules) {
-                if (await proxyRule.Matcher(matcherContext)) {
+                if(await proxyRule.Matcher(matcherContext)) {
                     _matchedRule = proxyRule;
                     break;
                 }
@@ -60,6 +61,25 @@ namespace SharpReverseProxy {
 
         private bool UserIsNotAuthenticated(HttpContext context) {
             return !(context.User.Identities.FirstOrDefault()?.IsAuthenticated ?? false);
+        }
+
+        private async Task<bool> RequestIsNotBlocked() {
+            if (_matchedRule.RequestBlocker == null) {
+                return true;
+            }
+            var context = new RequestBlockerContext {
+                HttpRequest = _context.Request,
+                LoggerUser = _context.User,
+                ServiceProvider = _context.RequestServices
+            };
+            var result = await _matchedRule.RequestBlocker(context);
+            if(result.Response == null) {
+                return true;
+            }
+            _response = result.Response;
+            await CopyResponseBody();
+            CopyResponseHeaders();
+            return false;
         }
 
         public async Task<bool> CreateInternalRequest() {
@@ -108,7 +128,7 @@ namespace SharpReverseProxy {
         }
 
         private async Task ApplyModificationsToRequest() {
-            if (_matchedRule.RequestModifier == null) {
+            if(_matchedRule.RequestModifier == null) {
                 return;
             }
             var requestModifierContext = new RequestModifierContext {
@@ -131,11 +151,10 @@ namespace SharpReverseProxy {
                 using (_response = await httpClient.SendAsync(_request,
                                                               HttpCompletionOption.ResponseHeadersRead,
                                                               _context.RequestAborted)) {
-                    CopyResponseHeaders();
-                    RemoveTransferEncodingHeader();
-                    await CopyResponseBody();
+                    HandleResponseHeaders();
+                    await HandleResponseBody();
                     await ApplyModificationsToResponse();
-                    await _options.Reporter.Invoke(_proxyResultBuilder.Proxied(_request.RequestUri,
+                    await _options.Reporter.Invoke(_proxyResultBuilder.Proxied(_request.RequestUri, 
                                                                                _context.Response.StatusCode));
                 }
                 return true;
@@ -155,15 +174,20 @@ namespace SharpReverseProxy {
                 return false;
             }
         }
-
+        
         private HttpClient GetHttpClient() {
             return _matchedRule.RuleHttpClient ?? _options.DefaultHttpClient;
         }
 
-        private void CopyResponseHeaders() {
+        private void HandleResponseHeaders() {
             if (!_matchedRule.CopyResponseHeaders) {
                 return;
             }
+            CopyResponseHeaders();
+            _context.Response.Headers.Remove("transfer-encoding");
+        }
+
+        private void CopyResponseHeaders() {
             _context.Response.StatusCode = (int)_response.StatusCode;
             _context.Response.ContentType = _response.Content?.Headers.ContentType?.MediaType;
             foreach (var header in _response.Headers) {
@@ -171,22 +195,25 @@ namespace SharpReverseProxy {
             }
         }
 
-        private void RemoveTransferEncodingHeader() {
-            _context.Response.Headers.Remove("transfer-encoding");
-        }
-
-        private async Task CopyResponseBody() {
+        private async Task HandleResponseBody() {
             if (!_matchedRule.CopyResponseBody || _response.Content == null) {
                 return;
             }
-            foreach (var contentHeader in _response.Content.Headers) {
+            await CopyResponseBody();
+        }
+
+        private async Task CopyResponseBody() {
+            if(_response.Content == null) {
+                return;
+            }
+            foreach (var contentHeader in _response.Content?.Headers) {
                 _context.Response.Headers[contentHeader.Key] = contentHeader.Value.ToArray();
             }
             await _response.Content.CopyToAsync(_context.Response.Body);
         }
 
         private async Task ApplyModificationsToResponse() {
-            if (_matchedRule.ResponseModifier == null) {
+            if(_matchedRule.ResponseModifier == null) {
                 return;
             }
             var responseModifierContext = new ResponseModifierContext {
