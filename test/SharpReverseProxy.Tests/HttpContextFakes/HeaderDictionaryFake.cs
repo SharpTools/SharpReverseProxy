@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using System.Linq;
 
 namespace SharpReverseProxy.Tests.HttpContextFakes {
     public class HeaderDictionaryFake : IHeaderDictionary {
@@ -26,6 +27,10 @@ namespace SharpReverseProxy.Tests.HttpContextFakes {
         public ICollection<StringValues> Values => _headers.Values;
 
         public int Count => _headers.Count;
+
+        public long? ContentLength { get => _headers["Content-Length"].ToArray().Select(s => (long?)long.Parse(s)).FirstOrDefault();
+            set => _headers["Content-Length"] = value.Value.ToString();
+        }
 
         public void Add(string key, StringValues value) {
             if(_parentResponse.HasStarted) {
