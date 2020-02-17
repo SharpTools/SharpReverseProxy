@@ -64,7 +64,7 @@ For every rule, define the matcher, the modifier and optinally a response modifi
 
 In the code below, we are adding the following rule:
 
-1. Find urls with `/api1`.  Ex: `http://www.noplace.com/api/[servicename]service/`
+1. Find urls with `/api/`.  Ex: `http://www.noplace.com/api/[servicename]service/`
 2. Proxy the request to: `http://[servicename].noplace.com/api/`
 
 ```csharp
